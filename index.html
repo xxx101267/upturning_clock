@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style>
+			ul{
+				margin: 0;
+				padding: 0;
+			}
+			li{
+				list-style: none;
+			}
+			.clearFix:after{
+				content: "";
+				clear: both;
+				display: block;
+			}
+			img{
+				border: none;
+				vertical-align: top;
+				width:50px;
+			}
+			#wrap ul{
+				float: left;
+			}
+			#wrap>img{
+				float: left;
+			}
+			#wrap ul li{
+				float: left;
+			}
+			#wrap ul div{
+				position: relative;
+				font-size: 0;
+				left: 0;
+				top: 0;
+			}
+			#wrap div img:nth-of-type(2){
+				position: absolute;
+				left:0px;
+				top:70px;
+			}
+			#wrap{
+				height:70px;
+				width:500px;
+				margin: 20px auto;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrap">
+			<ul>
+				<li>
+					<div>
+						<img src="img/0.jpg" />
+						<img src="img/0.jpg" />
+					</div>
+				</li>
+				<li>
+					<div>
+						<img src="img/0.jpg" />
+						<img src="img/0.jpg" />
+					</div>
+				</li>
+			</ul>
+			<ul>
+				<li>
+					<div>
+						<img src="img/mh.jpg" />
+						<img src="img/mh.jpg" />
+					</div>
+				</li>
+			</ul>
+			<ul>
+				<li>
+					<div>
+						<img src="img/0.jpg" />
+						<img src="img/0.jpg" />
+					</div>
+				</li>
+				<li>
+					<div>
+						<img src="img/0.jpg" />
+						<img src="img/0.jpg" />
+					</div>
+				</li>
+			</ul>
+			<ul>
+				<li>
+					<div>
+						<img src="img/mh.jpg" />
+						<img src="img/mh.jpg" />
+					</div>
+				</li>
+			</ul>
+			<ul>
+				<li>
+					<div>
+						<img src="img/0.jpg" />
+						<img src="img/0.jpg" />
+					</div>
+				</li>
+				<li>
+					<div>
+						<img src="img/0.jpg" />
+						<img src="img/0.jpg" />
+					</div>
+				</li>
+			</ul>
+		</div>	
+		<script>
+			var ImgTm=document.querySelectorAll("#wrap ul img:nth-of-type(1)");//获取时间图片
+			var divs=document.querySelectorAll("#wrap div");//获取所有需要上翻的div
+			var img2=document.querySelectorAll("#wrap div img:nth-of-type(2)");//获取所有隐藏的第2张图片
+			var timer=null;
+			var mhFn=null;
+			var onoff=true;
+			
+			var now=new Date();
+			var hour=now.getHours();
+			var mins=now.getMinutes();
+			var sec=now.getSeconds();
+			var str2=add0(hour)+":"+add0(mins)+":"+add0(sec);
+			
+			function add0(n){
+				if(n<10){
+					return "0"+n;
+				}else{
+					return ""+n;
+				}
+			}
+			
+			for(var i=0;i<ImgTm.length;i++){
+				if(str2[i]==":"){
+					ImgTm[i].src="img/mh.jpg";
+				}else{
+					ImgTm[i].src="img/"+str2[i]+".jpg";
+				}
+			}
+			
+			timer=setInterval(function(){
+				var now2=new Date();
+				var hour=now2.getHours();
+				var mins=now2.getMinutes();
+				var sec=now2.getSeconds();
+				var str0=add0(hour)+":"+add0(mins)+":"+add0(sec);
+				
+				var arrDf=findDf(str2,str0);
+				
+				str2=str0;
+				
+				for(var i=0;i<arrDf.length;i++){
+					var num=arrDf[i][0];
+					var next="img/"+ arrDf[i][1]+".jpg";
+					
+					ImgTm[num].src=next;
+					
+					MV(divs[arrDf[i][0]],{"top":-70},200,"linear",function(){
+						for(var i=0;i<divs.length;i++){
+							divs[i].style.top="0px";
+						}
+						img2[num].src=next;
+					})
+				}
+				/*if(onoff==false){
+					ImgTm[2].src="img/mh.jpg";
+					ImgTm[5].src="img/mh.jpg";
+				}else{
+					ImgTm[2].src="img/none.jpg";
+					ImgTm[5].src="img/none.jpg";
+				}
+				onoff=!onoff;*/
+			},1000)
+			
+			mhFn=setInterval(function(){
+				if(onoff==false){
+					ImgTm[2].src="img/mh.jpg";
+					ImgTm[5].src="img/mh.jpg";
+				}else{
+					ImgTm[2].src="img/none.jpg";
+					ImgTm[5].src="img/none.jpg";
+				}
+				onoff=!onoff;
+			},500)
+			
+			
+			
+			function findDf(a,b){
+				var arr=[];
+				for(var i=0;i<a.length;i++){
+					if(a[i]!=b[i]){
+						arr.push([i,b[i]])
+					}
+				}
+				return arr;
+			}
+			
+		//运动函数封装	
+		function MV(obj,attrs,duration,fx,endFn){
+			var j = {};
+			for(var att in attrs ){
+				j[att] = {};
+				j[att].b =  parseFloat(getComputedStyle(obj)[att]);
+				j[att].c = attrs[att] - j[att].b;//运行总路程
+			}
+			var d = duration;//持续时间
+			var past = new Date();
+			obj.timer = setInterval(function(){
+				var now = new Date();
+				var t = now - past;//已过时间
+				if(t > d){
+					t = d;
+				}
+				for(var att in j){
+					var b = j[att].b;
+					var c = j[att].c;
+					var v = Tween[fx](t, b, c, d);
+					if( att == "opacity" ){
+						obj.style[att] = v;
+					}else{
+						obj.style[att] = v + "px";
+					}
+				}
+				if(t==d){
+					clearInterval(obj.timer);
+					endFn && endFn();
+				}
+			},20)
+		}
+		//运动类型选择的数组
+		var Tween = {
+		    linear: function (t, b, c, d){  //匀速
+		        return c*t/d + b;
+		    },
+		    easeIn: function(t, b, c, d){  //加速曲线
+		        return c*(t/=d)*t + b;
+		    },
+		    easeOut: function(t, b, c, d){  //减速曲线
+		        return -c *(t/=d)*(t-2) + b;
+		    },
+		    easeBoth: function(t, b, c, d){  //加速减速曲线
+		        if ((t/=d/2) < 1) {
+		            return c/2*t*t + b;
+		        }
+		        return -c/2 * ((--t)*(t-2) - 1) + b;
+		    },
+		    easeInStrong: function(t, b, c, d){  //加加速曲线
+		        return c*(t/=d)*t*t*t + b;
+		    },
+		    easeOutStrong: function(t, b, c, d){  //减减速曲线
+		        return -c * ((t=t/d-1)*t*t*t - 1) + b;
+		    },
+		    easeBothStrong: function(t, b, c, d){  //加加速减减速曲线
+		        if ((t/=d/2) < 1) {
+		            return c/2*t*t*t*t + b;
+		        }
+		        return -c/2 * ((t-=2)*t*t*t - 2) + b;
+		    },
+		    elasticIn: function(t, b, c, d, a, p){  //正弦衰减曲线（弹动渐入）
+		        if (t === 0) {
+		            return b;
+		        }
+		        if ( (t /= d) == 1 ) {
+		            return b+c;
+		        }
+		        if (!p) {
+		            p=d*0.3;
+		        }
+		        if (!a || a < Math.abs(c)) {
+		            a = c;
+		            var s = p/4;
+		        } else {
+		            var s = p/(2*Math.PI) * Math.asin (c/a);
+		        }
+		        return -(a*Math.pow(2,10*(t-=1)) * Math.sin( (t*d-s)*(2*Math.PI)/p )) + b;
+		    },
+		    elasticOut: function(t, b, c, d, a, p){    //正弦增强曲线（弹动渐出）
+		        if (t === 0) {
+		            return b;
+		        }
+			}
+		}
+		</script>
+	</body>
+</html>
